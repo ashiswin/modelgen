@@ -10,6 +10,11 @@ class PHPDocument:
 		self.defineStatements()
 		self.constructor()
 		self.defineCreate()
+		self.defineSelect()
+		self.defineSelectAll()
+		self.defineUpdate()
+		self.defineDelete()
+		self.footer()
 		
 	def header(self):
 		className = self.table.title()
@@ -57,15 +62,18 @@ class PHPDocument:
 		
 		self.document += ")\");\n"
 		
-		# Define select statement
-		self.document += "\t\t\t$this->selectAllStatement = $mysqli->prepare(\"SELECT * FROM \" . " + connectorName + "::$TABLE_NAME . \");\n"
+		# TODO: Define select statement
+		self.document += "\t\t\t$this->selectStatement = $mysqli->prepare(\"SELECT * FROM \" . " + connectorName + "::$TABLE_NAME . \" WHERE `\" . " + connectorName + "::$COLUMN_ID . \"` = ?\");\n"
+		
+		# Define selectAll statement
+		self.document += "\t\t\t$this->selectAllStatement = $mysqli->prepare(\"SELECT * FROM \" . " + connectorName + "::$TABLE_NAME);\n"
 		
 		# TODO: Define update statement
 		
 		# Define delete statement
 		self.document += "\t\t\t$this->deleteStatement = $mysqli->prepare(\"DELETE FROM \" . " + connectorName + "::$TABLE_NAME . \" WHERE `\" . " + connectorName + "::$COLUMN_ID . \"` = ?\");\n"
 		
-		self.document += "}\n\n"
+		self.document += "\t\t}\n\n"
 	
 	def defineCreate(self):
 		self.document += "\t\tpublic function create("
@@ -103,11 +111,43 @@ class PHPDocument:
 			if i < len(self.columns) - 1:
 				self.document += ", "
 		self.document += ");\n"
+		self.document += "\t\t\treturn $this->createStatement->execute();\n";
+		self.document += "\t\t}\n\n"
 	
+	def defineSelect(self):
+		self.document += "\t\tpublic function select($id) {\n"
+		self.document += "\t\t\t$this->selectStatement->bind_param(\"i\", $id);\n"
+		self.document += "\t\t\tif(!$this->selectStatement->execute()) return false;\n\n"
+		self.document += "\t\t\treturn true;\n"
+		self.document += "\t\t}\n"
+		
+	def defineSelectAll(self):
+		self.document += "\t\tpublic function selectAll() {\n"
+		self.document += "\t\t\tif(!$this->selectAllStatement->execute()) return false;\n"
+		self.document += "\t\t\t$result = $this->selectAllStatement->get_result();\n"
+		self.document += "\t\t\t$resultArray = $result->fetch_all(MYSQLI_ASSOC);\n"
+		self.document += "\t\t\treturn $resultArray;\n"
+		self.document += "\t\t}\n\n"
+	
+	def defineUpdate(self):
+		pass
+		# TODO: Define update
+	
+	def defineDelete(self):
+		self.document += "\t\tpublic function delete($id) {\n"
+		self.document += "\t\t\t$this->deleteStatement->bind_param(\"i\", $id);\n"
+		self.document += "\t\t\tif(!$this->deleteStatement->execute()) return false;\n\n"
+		self.document += "\t\t\treturn true;\n"
+		self.document += "\t\t}\n"
+	
+	def footer(self):
+		self.document += "\t}\n"
+		self.document += "?>"
 	def display(self):
 		print self.document
 	
 	def save(self, file):
-		pass
+		file.write(self.document)
+		file.close()
 	
 	

@@ -1,3 +1,4 @@
+import os
 import mysql.connector
 from phpdocument import PHPDocument
 
@@ -25,6 +26,12 @@ if selection >= len(databases):
 	quit()
 
 conn.database = databases[selection]
+
+if not os.path.exists(databases[selection]):
+	os.mkdir(databases[selection])
+	os.mkdir(databases[selection] + "/connectors")
+	os.mkdir(databases[selection] + "/util")
+
 cur.execute("show tables")
 
 tables = []
@@ -39,6 +46,9 @@ for t in tables:
 	for x in cur:
 		columns.append(x)
 	
-	print columns
 	d = PHPDocument(t, columns)
-	d.display()
+	
+	connectorName = t.title() + "Connector"
+	d.save(open(databases[selection] + '/connectors/' + connectorName + '.php', 'w'))
+	
+	print "Processed table " + t
