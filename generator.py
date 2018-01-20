@@ -39,6 +39,6 @@ for t in tables:
 	for x in cur:
 		columns.append(x)
 	
-	
-	d = PHPDocument(t)
-	
+	print columns
+	d = PHPDocument(t, columns)
+	d.display()
