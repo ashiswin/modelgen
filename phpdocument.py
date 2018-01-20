@@ -62,7 +62,7 @@ class PHPDocument:
 		
 		self.document += ")\");\n"
 		
-		# TODO: Define select statement
+		# Define select statement
 		self.document += "\t\t\t$this->selectStatement = $mysqli->prepare(\"SELECT * FROM \" . " + connectorName + "::$TABLE_NAME . \" WHERE `\" . " + connectorName + "::$COLUMN_ID . \"` = ?\");\n"
 		
 		# Define selectAll statement
