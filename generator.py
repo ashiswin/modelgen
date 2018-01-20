@@ -1,7 +1,10 @@
 import mysql.connector
 from phpdocument import PHPDocument
 
-conn = mysql.connector.connect(user='ashiswin', password='terror56', host='devostrum.no-ip.info')
+user = raw_input('Enter username: ')
+password = raw_input('Enter password: ')
+host = raw_input('Enter host: ')
+conn = mysql.connector.connect(user=user, password=password, host=host)
 cur = conn.cursor()
 cur.execute('show databases')
 
