@@ -4,7 +4,19 @@ This project consists of a set of scripts that allow you to easily generate mode
 
 ## Getting Started
 
-Simply clone this repository to get started.
+Simply clone this repository to get started. Once set up, just run
+
+```
+python generator.py
+```
+to launch the generator tool. The tool will generate a directory structure as follows:
+```
+./<dbname>
+./<dbname>/connectors
+./<dbname>/util
+```
+
+The connectors folder contains all the model code files while the util folder contains the database connection configuration.
 
 ### Prerequisites
 
