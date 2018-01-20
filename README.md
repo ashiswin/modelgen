@@ -30,4 +30,4 @@ It was written for Python 2.7, but can work with slight modifications in Python 
 
 ## License
 
-This project is licensed under the MIT License
+This project is licensed under the MIT License.
