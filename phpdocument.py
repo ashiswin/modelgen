@@ -187,7 +187,8 @@ class PHPGetterDocument:
 		self.document += "\t$id = $_GET['id'];\n\n"
 		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
 		self.document += "\t$response['" + singularize(self.table) + "'] = $" + self.connectorName + "->select($id);\n"
-		self.document += "\t$response['success'] = true;\n"
+		self.document += "\t$response['success'] = true;\n\n"
+		self.document += "\techo(json_encode($response));\n"
 		self.document += "?>"
 	
 	def display(self):
@@ -212,10 +213,10 @@ class PHPAllGetterDocument:
 		self.document += "\trequire_once 'connectors/" + self.connectorName + ".php';\n\n"
 	
 	def body(self):
-		self.document += "\t$id = $_GET['id'];\n\n"
 		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
 		self.document += "\t$response['" + self.table + "'] = $" + self.connectorName + "->selectAll();\n"
-		self.document += "\t$response['success'] = true;\n"
+		self.document += "\t$response['success'] = true;\n\n"
+		self.document += "\techo(json_encode($response));\n"
 		self.document += "?>"
 	
 	def display(self):
@@ -243,7 +244,58 @@ class PHPDeleterDocument:
 		self.document += "\t$id = $_POST['id'];\n\n"
 		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
 		self.document += "\t$response['" + singularize(self.table) + "'] = $" + self.connectorName + "->delete($id);\n"
-		self.document += "\t$response['success'] = true;\n"
+		self.document += "\t$response['success'] = true;\n\n"
+		self.document += "\techo(json_encode($response));\n"
+		self.document += "?>"
+	
+	def display(self):
+		print self.document
+	
+	def save(self, file):
+		file.write(self.document)
+		file.close()
+
+class PHPCreatorDocument:
+	def __init__(self, t, c):
+		self.connectorName = singularize(t.title()) + "Connector"
+		self.table = t
+		self.columns = c
+		
+		self.document = "<?php\n"
+		
+		self.includes()
+		self.body()
+	
+	def includes(self):
+		self.document += "\trequire_once 'utils/database.php';\n"
+		self.document += "\trequire_once 'connectors/" + self.connectorName + ".php';\n\n"
+	
+	def body(self):
+		for c in self.columns:
+			if c[0] == 'id':
+				continue
+			self.document += "\t$" + c[0] + " = $_POST['" + c[0] + "'];\n"
+		self.document += "\n"
+		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
+		self.document += "\tif(!$" + self.connectorName + "->create("
+		first = True
+		for c in self.columns:
+			if c[0] == 'id':
+				continue
+			
+			if not first:
+				self.document += ", "
+			
+			first = False
+			self.document += "$" + c[0]
+		self.document += ")) {\n"
+		self.document += "\t\t$response['success'] = false;\n"
+		self.document += "\t\t$response['message'] = \"Failed to create " + singularize(self.table) + "!\";\n"
+		self.document += "\t}\n"
+		self.document += "\telse {\n"
+		self.document += "\t\t$response['success'] = true;\n"
+		self.document += "\t}\n\n"
+		self.document += "\techo(json_encode($response));\n"
 		self.document += "?>"
 	
 	def display(self):
