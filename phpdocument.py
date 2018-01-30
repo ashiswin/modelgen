@@ -1,4 +1,6 @@
-class PHPDocument:
+from pattern.text.en import singularize
+
+class PHPConnectorDocument:
 	def __init__(self, t, c):
 		self.table = t
 		self.columns = c
@@ -17,7 +19,7 @@ class PHPDocument:
 		self.footer()
 		
 	def header(self):
-		className = self.table.title()
+		className = singularize(self.table.title())
 		self.document += "\tclass " + className + "Connector {\n"
 		self.document += "\t\tprivate $mysqli = NULL;\n\n"
 		self.document += "\t\tpublic static $TABLE_NAME = \"" + self.table + "\";\n"
@@ -35,7 +37,7 @@ class PHPDocument:
 		self.document += "\t\tprivate $deleteStatement = NULL;\n"
 	
 	def constructor(self):
-		connectorName = self.table.title() + "Connector"
+		connectorName = singularize(self.table.title()) + "Connector"
 		self.document += "\t\tfunction __construct($mysqli) {\n"
 		self.document += "\t\t\tif($mysqli->connect_errno > 0){\n"
 		self.document += "\t\t\t\tdie('Unable to connect to database [' . $mysqli->connect_error . ']');\n"
@@ -149,5 +151,48 @@ class PHPDocument:
 	def save(self, file):
 		file.write(self.document)
 		file.close()
+
+class PHPDatabaseDocument:
+	def __init__(self, host, user, pwd, db):
+		self.document = "<?php\n"
+		self.document += "\t$conn = new mysqli(\"" + host + "\", \"" + user + "\", \"" + pwd + "\", \"" + db + "\");\n"
+		self.document += "\tif($conn->connect_error) {\n"
+		self.document += "\t\t$response[\"success\"] = false;\n"
+		self.document += "\t\t$response[\"message\"] = \"Connection failed: \" . $conn->connect_error;\n"
+		self.document += "\t}\n"
+		self.document += "?>\n"
 	
+	def display(self):
+		print self.document
 	
+	def save(self, file):
+		file.write(self.document)
+		file.close()
+
+class PHPGetterDocument:
+	def __init__(self, t):
+		self.connectorName = singularize(t.title()) + "Connector"
+		self.table = t
+		
+		self.document = "<?php\n"
+		
+		self.includes()
+		self.body()
+		
+	def includes(self):
+		self.document += "\trequire_once 'utils/database.php';\n"
+		self.document += "\trequire_once 'connectors/" + self.connectorName + ".php';\n\n"
+	
+	def body(self):
+		self.document += "\t$id = $_GET['id'];\n\n"
+		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
+		self.document += "\t$response['" + singularize(self.table) + "'] = $" + self.connectorName + "->select($id);\n"
+		self.document += "\t$response['success'] = true;\n"
+		self.document += "?>"
+	
+	def display(self):
+		print self.document
+	
+	def save(self, file):
+		file.write(self.document)
+		file.close()

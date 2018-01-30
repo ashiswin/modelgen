@@ -1,6 +1,7 @@
 import os
 import mysql.connector
-from phpdocument import PHPDocument
+from phpdocument import PHPConnectorDocument, PHPDatabaseDocument, PHPGetterDocument
+from pattern.text.en import singularize
 
 # Request for MySQL authentication details
 user = raw_input('Enter MySQL username: ')
@@ -39,7 +40,7 @@ conn.database = databases[selection]
 if not os.path.exists(databases[selection]):
 	os.mkdir(databases[selection])
 	os.mkdir(databases[selection] + "/connectors")
-	os.mkdir(databases[selection] + "/util")
+	os.mkdir(databases[selection] + "/utils")
 
 # Get and store table name list
 cur.execute("show tables")
@@ -47,6 +48,11 @@ cur.execute("show tables")
 tables = []
 for x in cur:
 	tables.append(x[0])
+
+dbDoc = PHPDatabaseDocument(host, user, password, databases[selection])
+dbDoc.save(open(databases[selection] + '/utils/database.php', 'w'))
+
+print "Wrote database configuration file"
 
 # Process tables
 for t in tables:
@@ -60,10 +66,13 @@ for t in tables:
 		columns.append(x)
 	
 	# Pass table details to PHP generator
-	d = PHPDocument(t, columns)
+	d = PHPConnectorDocument(t, columns)
+	getter = PHPGetterDocument(t)
 	
 	# Write generated document to file
-	connectorName = t.title() + "Connector"
+	connectorName = singularize(t.title()) + "Connector"
 	d.save(open(databases[selection] + '/connectors/' + connectorName + '.php', 'w'))
-	
+	print "\tWrote connector to " + databases[selection] + '/connectors/' + connectorName + '.php'
+	getter.save(open(databases[selection] + '/Get' + singularize(t.title()) + '.php', 'w'))
+	print "\tWrote getter to " + databases[selection] + '/Get' + singularize(t.title()) + '.php'
 	print "Processed table " + t

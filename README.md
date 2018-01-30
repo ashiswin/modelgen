@@ -20,10 +20,11 @@ The connectors folder contains all the model code files while the util folder co
 
 ### Prerequisites
 
-This project only has one dependency, mysql-connector. Install it with
+This project depends on the following packages:
 
 ```
 pip install mysql-connector
+pip install pattern
 ```
 
 It was written for Python 2.7, but can work with slight modifications in Python 3+.
