@@ -1,6 +1,6 @@
 import os
 import mysql.connector
-from phpdocument import PHPConnectorDocument, PHPDatabaseDocument, PHPGetterDocument
+from phpdocument import PHPConnectorDocument, PHPDatabaseDocument, PHPGetterDocument, PHPAllGetterDocument, PHPDeleterDocument
 from pattern.text.en import singularize
 
 # Request for MySQL authentication details
@@ -68,6 +68,8 @@ for t in tables:
 	# Pass table details to PHP generator
 	d = PHPConnectorDocument(t, columns)
 	getter = PHPGetterDocument(t)
+	allgetter = PHPAllGetterDocument(t)
+	deleter = PHPDeleterDocument(t)
 	
 	# Write generated document to file
 	connectorName = singularize(t.title()) + "Connector"
@@ -75,4 +77,9 @@ for t in tables:
 	print "\tWrote connector to " + databases[selection] + '/connectors/' + connectorName + '.php'
 	getter.save(open(databases[selection] + '/Get' + singularize(t.title()) + '.php', 'w'))
 	print "\tWrote getter to " + databases[selection] + '/Get' + singularize(t.title()) + '.php'
+	allgetter.save(open(databases[selection] + '/GetAll' + t.title() + '.php', 'w'))
+	print "\tWrote allgetter to " + databases[selection] + '/GetAll' + t.title() + '.php'
+	deleter.save(open(databases[selection] + '/Delete' + singularize(t.title()) + '.php', 'w'))
+	print "\tWrote deleter to " + databases[selection] + '/Delete' + t.title() + '.php'
+	
 	print "Processed table " + t

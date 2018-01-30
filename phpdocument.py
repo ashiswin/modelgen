@@ -99,7 +99,7 @@ class PHPConnectorDocument:
 				continue
 			if "int" in c[1]:
 				types += "i"
-			elif "varchar" in c[1] or "text" in c[1]:
+			elif "varchar" in c[1] or "text" in c[1] or "date" in c[1]:
 				types += "s"
 			else:
 				types += "?"
@@ -187,6 +187,62 @@ class PHPGetterDocument:
 		self.document += "\t$id = $_GET['id'];\n\n"
 		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
 		self.document += "\t$response['" + singularize(self.table) + "'] = $" + self.connectorName + "->select($id);\n"
+		self.document += "\t$response['success'] = true;\n"
+		self.document += "?>"
+	
+	def display(self):
+		print self.document
+	
+	def save(self, file):
+		file.write(self.document)
+		file.close()
+
+class PHPAllGetterDocument:
+	def __init__(self, t):
+		self.connectorName = singularize(t.title()) + "Connector"
+		self.table = t
+		
+		self.document = "<?php\n"
+		
+		self.includes()
+		self.body()
+		
+	def includes(self):
+		self.document += "\trequire_once 'utils/database.php';\n"
+		self.document += "\trequire_once 'connectors/" + self.connectorName + ".php';\n\n"
+	
+	def body(self):
+		self.document += "\t$id = $_GET['id'];\n\n"
+		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
+		self.document += "\t$response['" + self.table + "'] = $" + self.connectorName + "->selectAll();\n"
+		self.document += "\t$response['success'] = true;\n"
+		self.document += "?>"
+	
+	def display(self):
+		print self.document
+	
+	def save(self, file):
+		file.write(self.document)
+		file.close()
+
+class PHPDeleterDocument:
+	def __init__(self, t):
+		self.connectorName = singularize(t.title()) + "Connector"
+		self.table = t
+		
+		self.document = "<?php\n"
+		
+		self.includes()
+		self.body()
+		
+	def includes(self):
+		self.document += "\trequire_once 'utils/database.php';\n"
+		self.document += "\trequire_once 'connectors/" + self.connectorName + ".php';\n\n"
+	
+	def body(self):
+		self.document += "\t$id = $_POST['id'];\n\n"
+		self.document += "\t$" + self.connectorName + " = new " + self.connectorName + "($conn);\n\n"
+		self.document += "\t$response['" + singularize(self.table) + "'] = $" + self.connectorName + "->delete($id);\n"
 		self.document += "\t$response['success'] = true;\n"
 		self.document += "?>"
 	
