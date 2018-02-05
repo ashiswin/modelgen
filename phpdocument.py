@@ -57,9 +57,9 @@ class PHPConnectorDocument:
 			if i < len(self.columns) - 1:
 				self.document += ","
 		self.document += ") VALUES("
-		for i in range(len(self.columns)):
+		for i in range(len(self.columns) - 1):
 			self.document += "?"
-			if i < len(self.columns) - 1:
+			if i < len(self.columns) - 2:
 				self.document += ","
 		
 		self.document += ")\");\n"
